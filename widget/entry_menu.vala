@@ -3,31 +3,65 @@ using Utils;
 
 namespace Widgets {
     public class EntryMenu : Object {
-        public Menu.Menu menu;
+        public Gtk.Menu menu;
         
         public EntryMenu() {
             Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
         }
 
         public void create_entry_menu(Gtk.Entry entry, int x, int y) {
-            var menu_content = new List<Menu.MenuItem>();
+            // Init Menu
+            menu = new Gtk.Menu();
+            
             if (is_selection(entry)) {
-                menu_content.append(new Menu.MenuItem("cut", _("Cut")));
-                menu_content.append(new Menu.MenuItem("copy", _("Copy")));
-            }
-            menu_content.append(new Menu.MenuItem("paste", _("Paste")));
-            menu_content.append(new Menu.MenuItem("", ""));
-            if (is_selection(entry)) {
-                menu_content.append(new Menu.MenuItem("delete", _("Delete")));
-                menu_content.append(new Menu.MenuItem("", ""));
-            }
-            menu_content.append(new Menu.MenuItem("select_all", _("Select all")));
-                        
-            menu = new Menu.Menu(x, y, menu_content);
-            menu.click_item.connect((item_id) => {
-                    handle_menu_item_click(entry, item_id);
+                // Cut
+                Gtk.MenuItem cut = new Gtk.MenuItem.with_label("Cut");
+                cut.activate.connect (() => {
+                     handle_menu_item_click(entry, "cut");
                 });
-            menu.destroy.connect(handle_menu_destroy);
+                menu.append(cut);
+
+                // Copy
+                Gtk.MenuItem copy = new Gtk.MenuItem.with_label("Copy");
+                copy.activate.connect (() => {
+                    handle_menu_item_click(entry, "copy");
+                });
+                menu.append(copy);
+            }
+
+            // Paste
+            Gtk.MenuItem paste = new Gtk.MenuItem.with_label("Paste");
+             paste.activate.connect (() => {
+                 handle_menu_item_click(entry, "paste");
+            });
+            menu.append(paste);
+
+            // ------
+            Gtk.SeparatorMenuItem separator_1 = new Gtk.SeparatorMenuItem ();
+            menu.add(separator_1);
+            if (is_selection(entry)) {
+                // Delete
+                Gtk.MenuItem delete_btn = new Gtk.MenuItem.with_label("Delete");
+                delete_btn.activate.connect (() => {
+                     handle_menu_item_click(entry, "delete");
+                });
+                menu.append(delete_btn);
+
+                // ------
+                Gtk.SeparatorMenuItem separator_2 = new Gtk.SeparatorMenuItem ();
+                menu.add(separator_2);
+            }
+
+            // Select all
+            Gtk.MenuItem select_all = new Gtk.MenuItem.with_label("Select all");
+            select_all.activate.connect (() => {
+                 handle_menu_item_click(entry, "select_all");
+            });
+            menu.append(select_all);
+                        
+            // Exec
+            menu.show_all();
+            menu.popup(null, null, null, 0, 0);
         }
 
         public void handle_menu_item_click(Gtk.Entry entry, string item_id) {

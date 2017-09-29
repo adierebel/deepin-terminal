@@ -23,7 +23,6 @@
 
 using Gee;
 using Gtk;
-using Menu;
 using Utils;
 using Vte;
 using Widgets;
@@ -36,7 +35,7 @@ namespace Widgets {
             TEXT
         }
 
-        public Menu.Menu menu;
+        public Gtk.Menu menu;
         public WorkspaceManager workspace_manager;
         public bool has_select_all = false;
         public int font_size = 0;
@@ -238,78 +237,205 @@ namespace Widgets {
 
             bool display_first_spliter = false;
 
-            var menu_content = new GLib.List<Menu.MenuItem>();
+            // Init Menu
+            menu = new Gtk.Menu();
+           
             if (term.get_has_selection()) {
-                menu_content.append(new Menu.MenuItem("copy", _("Copy")));
+                // Copy
+                Gtk.MenuItem copy = new Gtk.MenuItem.with_label("Copy");
+                copy.activate.connect (() => {
+                       handle_menu_item_click("copy");
+                });
+                menu.append(copy);
 
                 display_first_spliter = true;
             } else if (uri_at_right_press != null) {
-                menu_content.append(new Menu.MenuItem("copy", _("Copy link")));
+                // Copy
+                Gtk.MenuItem copy = new Gtk.MenuItem.with_label("Copy link");
+                copy.activate.connect (() => {
+                       handle_menu_item_click("copy");
+                });
+                menu.append(copy);
 
                 display_first_spliter = true;
             }
 
             if (clipboard_has_context()) {
-                menu_content.append(new Menu.MenuItem("paste", _("Paste")));
+                // Paste
+                Gtk.MenuItem paste = new Gtk.MenuItem.with_label("Paste");
+                paste.activate.connect (() => {
+                       handle_menu_item_click("paste");
+                });
+                menu.append(paste);
 
                 display_first_spliter = true;
             }
             if (term.get_has_selection()) {
                 var selection_file = get_selection_file();
                 if (selection_file != null) {
-                    menu_content.append(new Menu.MenuItem("open", _("Open")));
+                    // Open
+                    Gtk.MenuItem open = new Gtk.MenuItem.with_label("Open");
+                    open.activate.connect (() => {
+                           handle_menu_item_click("open");
+                    });
+                    menu.append(open);
                 }
 
                 display_first_spliter = true;
             }
+
             if (display_first_spliter) {
-                menu_content.append(new Menu.MenuItem("", ""));
+                Gtk.SeparatorMenuItem separator_1 = new Gtk.SeparatorMenuItem ();
+                menu.add(separator_1);
             }
 
-            menu_content.append(new Menu.MenuItem("horizontal_split", _("Horizontal split")));
-            menu_content.append(new Menu.MenuItem("vertical_split", _("Vertical split")));
-            menu_content.append(new Menu.MenuItem("close_window", _("Close window")));
+            // Horizontal split
+            Gtk.MenuItem horizontal_split = new Gtk.MenuItem.with_label("Horizontal split");
+            horizontal_split.activate.connect (() => {
+                handle_menu_item_click("horizontal_split");
+            });
+            menu.append(horizontal_split);
+
+            // Vertical split
+            Gtk.MenuItem vertical_split = new Gtk.MenuItem.with_label("Vertical split");
+            vertical_split.activate.connect (() => {
+                handle_menu_item_click("vertical_split");
+            });
+            menu.append(vertical_split);
+
+            // Close window
+            Gtk.MenuItem close_window = new Gtk.MenuItem.with_label("Close window");
+            close_window.activate.connect (() => {
+                handle_menu_item_click("close_window");
+            });
+            menu.append(close_window);
             if (workspace_manager.focus_workspace.term_list.size > 1) {
-                menu_content.append(new Menu.MenuItem("close_other_windows", _("Close other windows")));
+                // Close window
+                Gtk.MenuItem close_other_windows = new Gtk.MenuItem.with_label("Close other windows");
+                close_other_windows.activate.connect (() => {
+                    handle_menu_item_click("close_other_windows");
+                });
+                menu.append(close_other_windows);
             }
-            menu_content.append(new Menu.MenuItem("", ""));
+            Gtk.SeparatorMenuItem separator_2 = new Gtk.SeparatorMenuItem ();
+            menu.add(separator_2);
 
-            menu_content.append(new Menu.MenuItem("new_workspace", _("New workspace")));
-            menu_content.append(new Menu.MenuItem("", ""));
+            // New workspace
+            Gtk.MenuItem new_workspace = new Gtk.MenuItem.with_label("New workspaces");
+            new_workspace.activate.connect (() => {
+                handle_menu_item_click("new_workspace");
+            });
+            menu.append(new_workspace);
+            
+            Gtk.SeparatorMenuItem separator_3 = new Gtk.SeparatorMenuItem ();
+            menu.add(separator_3);
 
             if (!in_quake_window) {
                 var window = ((Widgets.Window) get_toplevel());
                 if (window.window_is_fullscreen()) {
-                    menu_content.append(new Menu.MenuItem("quit_fullscreen", _("Exit fullscreen")));
+                    // Exit fullscreen
+                    Gtk.MenuItem quit_fullscreen = new Gtk.MenuItem.with_label("Exit fullscreen");
+                    quit_fullscreen.activate.connect (() => {
+                        handle_menu_item_click("quit_fullscreen");
+                    });
+                    menu.append(quit_fullscreen);
                 } else {
-                    menu_content.append(new Menu.MenuItem("fullscreen", _("Fullscreen")));
+                    // fullscreen
+                    Gtk.MenuItem fullscreen = new Gtk.MenuItem.with_label("Fullscreen");
+                    fullscreen.activate.connect (() => {
+                        handle_menu_item_click("fullscreen");
+                    });
+                    menu.append(fullscreen);
                 }
             }
 
-            menu_content.append(new Menu.MenuItem("search", _("Search")));
+            // Search
+            Gtk.MenuItem search = new Gtk.MenuItem.with_label("Search");
+            search.activate.connect (() => {
+                handle_menu_item_click("search");
+            });
+            menu.append(search);
             if (term.get_has_selection()) {
-                menu_content.append(new Menu.MenuItem("google", "Google"));
+                // Google
+                Gtk.MenuItem google = new Gtk.MenuItem.with_label("Google");
+                google.activate.connect (() => {
+                    handle_menu_item_click("google");
+                });
+                menu.append(google);
             }
-            menu_content.append(new Menu.MenuItem("", ""));
+
+            Gtk.SeparatorMenuItem separator_4 = new Gtk.SeparatorMenuItem ();
+            menu.add(separator_4);
+
             if (in_quake_window) {
-                menu_content.append(new Menu.MenuItem("switch_theme", _("Switch theme")));
+                // Switch theme
+                Gtk.MenuItem switch_theme = new Gtk.MenuItem.with_label("Switch theme");
+                switch_theme.activate.connect (() => {
+                    handle_menu_item_click("switch_theme");
+                });
+                menu.append(switch_theme);
             }
-            menu_content.append(new Menu.MenuItem("rename_title", _("Rename title")));
-            menu_content.append(new Menu.MenuItem("encoding", _("Encoding")));
-            menu_content.append(new Menu.MenuItem("custom_commands", _("Custom commands")));
-            menu_content.append(new Menu.MenuItem("remote_manage", _("Remote management")));
+
+            // Rename title
+            Gtk.MenuItem rename_title = new Gtk.MenuItem.with_label("Rename title");
+            rename_title.activate.connect (() => {
+                handle_menu_item_click("rename_title");
+            });
+            menu.append(rename_title);
+
+            // Encoding
+            Gtk.MenuItem encoding = new Gtk.MenuItem.with_label("Encoding");
+            encoding.activate.connect (() => {
+                handle_menu_item_click("encoding");
+            });
+            menu.append(encoding);
+
+            // Custom commands
+            Gtk.MenuItem custom_commands = new Gtk.MenuItem.with_label("Custom commands");
+            custom_commands.activate.connect (() => {
+                handle_menu_item_click("custom_commands");
+            });
+            menu.append(custom_commands);
+
+            // Remote management
+            Gtk.MenuItem remote_manage = new Gtk.MenuItem.with_label("Remote management");
+            remote_manage.activate.connect (() => {
+                handle_menu_item_click("remote_manage");
+            });
+            menu.append(remote_manage);
+
             if (is_in_remote_server()) {
-                menu_content.append(new Menu.MenuItem("", ""));
-                menu_content.append(new Menu.MenuItem("upload_file", _("Upload file")));
-                menu_content.append(new Menu.MenuItem("download_file", _("Download file")));
+                Gtk.SeparatorMenuItem separator_5 = new Gtk.SeparatorMenuItem ();
+                menu.add(separator_5);
+
+                // Upload file
+                Gtk.MenuItem upload_file = new Gtk.MenuItem.with_label("Upload file");
+                upload_file.activate.connect (() => {
+                    handle_menu_item_click("upload_file");
+                });
+                menu.append(upload_file);
+
+                // Download file
+                Gtk.MenuItem download_file = new Gtk.MenuItem.with_label("Download file");
+                download_file.activate.connect (() => {
+                    handle_menu_item_click("download_file");
+                });
+                menu.append(download_file);
             }
 
-            menu_content.append(new Menu.MenuItem("", ""));
-            menu_content.append(new Menu.MenuItem("preference", _("Settings")));
+            Gtk.SeparatorMenuItem separator_6 = new Gtk.SeparatorMenuItem ();
+            menu.add(separator_6);
 
-            menu = new Menu.Menu(x, y, menu_content);
-            menu.click_item.connect(handle_menu_item_click);
-            menu.destroy.connect(handle_menu_destroy);
+            // Settings
+            Gtk.MenuItem preference = new Gtk.MenuItem.with_label("Settings");
+            preference.activate.connect (() => {
+                handle_menu_item_click("preference");
+            });
+            menu.append(preference);
+
+            // Exec
+            menu.show_all();
+            menu.popup(null, null, null, 0, 0);
 
         }
 

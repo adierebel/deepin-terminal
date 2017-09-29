@@ -65,7 +65,6 @@ vala_precompile(VALA_C
 	./lib/constant.vala
 	./lib/draw.vala
 	./lib/keymap.vala
-	./lib/menu.vala
 	./lib/utils.vala
 	./lib/xutils.vala
 	./widget/about_dialog.vala

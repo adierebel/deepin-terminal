@@ -32,7 +32,7 @@ interface TerminalBus : Object {
 
 namespace Widgets {
     public class Appbar : Gtk.Overlay {
-		public int height = Constant.TITLEBAR_HEIGHT;
+        public int height = Constant.TITLEBAR_HEIGHT;
         public Box max_toggle_box;
         public Box window_button_box;
         public Box window_close_button_box;
@@ -43,7 +43,7 @@ namespace Widgets {
         public WindowButton min_button;
         public WindowButton quit_fullscreen_button;
         public WindowButton unmax_button;
-        public Menu.Menu menu;
+        public Gtk.Menu menu;
         public Tabbar tabbar;
         public Widgets.Window window;
         public Widgets.WindowEventArea event_area;
@@ -60,8 +60,8 @@ namespace Widgets {
 
             window = win;
             workspace_manager = manager;
-			
-			set_size_request(-1, height);
+            
+            set_size_request(-1, height);
             
             if (has_start) {
                 // If has one terminal start,
@@ -93,7 +93,7 @@ namespace Widgets {
                         app.exit();
                     });
             }
-			
+            
             tabbar = tab_bar;
             
             window_button_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
@@ -115,30 +115,77 @@ namespace Widgets {
             
             menu_button.clicked.connect((b) => {
                     focus_widget = ((Gtk.Window) menu_button.get_toplevel()).get_focus();
+
+                    // Init Menu
+                    menu = new Gtk.Menu();
+
+                    // New window
+                    Gtk.MenuItem new_window = new Gtk.MenuItem.with_label("New window");
+                    new_window.activate.connect (() => {
+                        handle_menu_item_click("new_window");
+                    });
+                    menu.append(new_window);
+
+                    // Switch theme
+                    Gtk.MenuItem switch_theme = new Gtk.MenuItem.with_label("Switch theme");
+                    switch_theme.activate.connect (() => {
+                        handle_menu_item_click("switch_theme");
+                    });
+                    menu.append(switch_theme);
+
+                    // Custom commands
+                    Gtk.MenuItem custom_commands = new Gtk.MenuItem.with_label("Custom commands");
+                    custom_commands.activate.connect (() => {
+                        handle_menu_item_click("custom_commands");
+                    });
+                    menu.append(custom_commands);
                     
-                    var menu_content = new List<Menu.MenuItem>();
-                    menu_content.append(new Menu.MenuItem("new_window", _("New window")));
-                    menu_content.append(new Menu.MenuItem("switch_theme", _("Switch theme")));
-                    menu_content.append(new Menu.MenuItem("custom_commands", _("Custom commands")));
-                    menu_content.append(new Menu.MenuItem("remote_manage", _("Remote management")));
-                    menu_content.append(new Menu.MenuItem("", ""));
-                    menu_content.append(new Menu.MenuItem("preference", _("Settings")));
-                    if (Utils.is_command_exist("dman")) {
-                        menu_content.append(new Menu.MenuItem("help", _("Help")));
-                    }
-                    menu_content.append(new Menu.MenuItem("about", _("About")));
-                    menu_content.append(new Menu.MenuItem("exit", _("Exit")));
+                    // Remote management
+                    Gtk.MenuItem remote_manage = new Gtk.MenuItem.with_label("Remote management");
+                    remote_manage.activate.connect (() => {
+                        handle_menu_item_click("remote_manage");
+                    });
+                    menu.append(remote_manage);
+
+                    // ------
+                    Gtk.SeparatorMenuItem separator = new Gtk.SeparatorMenuItem ();
+                    menu.add(separator);
+
+                    // Settings
+                    Gtk.MenuItem preference = new Gtk.MenuItem.with_label("Settings");
+                    preference.activate.connect (() => {
+                        handle_menu_item_click("preference");
+                    });
+                    menu.append(preference);
+
+                    // About
+                    Gtk.MenuItem about = new Gtk.MenuItem.with_label("About");
+                    about.activate.connect (() => {
+                        handle_menu_item_click("about");
+                    });
+                    menu.append(about);
+
+                    // Exit
+                    Gtk.MenuItem exit = new Gtk.MenuItem.with_label("Exit");
+                    exit.activate.connect (() => {
+                        handle_menu_item_click("exit");
+                    });
+                    menu.append(exit);
                     
+                    /* Position
                     int menu_x, menu_y;
                     menu_button.translate_coordinates(menu_button.get_toplevel(), 0, 0, out menu_x, out menu_y);
                     Gtk.Allocation menu_rect;
                     menu_button.get_allocation(out menu_rect);
                     int window_x, window_y;
                     menu_button.get_toplevel().get_window().get_origin(out window_x, out window_y);
-                    
-                    menu = new Menu.Menu(window_x + menu_x, window_y + menu_y + menu_rect.height, menu_content);
-                    menu.click_item.connect(handle_menu_item_click);
-                    menu.destroy.connect(handle_menu_destroy);
+                    return(window_x + menu_x, window_y + menu_y + menu_rect.height);
+                    */
+
+                    // Exec
+                    menu.show_all();
+                    menu.popup(null, null, null, 0, 0);
+
                 });
             
             max_toggle_box = new Box(Gtk.Orientation.HORIZONTAL, 0);
@@ -154,13 +201,13 @@ namespace Widgets {
                 });
             
             Box box = new Box(Gtk.Orientation.HORIZONTAL, 0);
-			
-			var logo_box = new Box(Gtk.Orientation.VERTICAL, 0);
-			logo_box.set_size_request(logo_width, Constant.TITLEBAR_HEIGHT);
-			Gtk.Image logo_image = new Gtk.Image.from_file(Utils.get_image_path("title_icon.png"));
-			logo_box.pack_start(logo_image, true, true, 0);
-			box.pack_start(logo_box, false, false, 0);
-			
+            
+            var logo_box = new Box(Gtk.Orientation.VERTICAL, 0);
+            logo_box.set_size_request(logo_width, Constant.TITLEBAR_HEIGHT);
+            Gtk.Image logo_image = new Gtk.Image.from_file(Utils.get_image_path("title_icon.png"));
+            logo_box.pack_start(logo_image, true, true, 0);
+            box.pack_start(logo_box, false, false, 0);
+            
             max_toggle_box.add(max_button);
 
             box.pack_start(tabbar, true, true, 0);
@@ -236,7 +283,7 @@ namespace Widgets {
                     } catch (GLib.Error e) {
                         print("Appbar menu item 'new window': %s\n", e.message);
                     }
-			    	break;
+                    break;
                 case "custom_commands":
                     workspace_manager.focus_workspace.show_command_panel(workspace_manager.focus_workspace);
                     break;
@@ -246,26 +293,26 @@ namespace Widgets {
                 case "switch_theme":
                     workspace_manager.focus_workspace.show_theme_panel(workspace_manager.focus_workspace);
                     break;
-				case "help":
+                case "help":
                     Utils.show_manual();
-					break;
-			    case "about":
+                    break;
+                case "about":
                     var dialog = new AboutDialog(focus_widget);
                     dialog.transient_for_window((Widgets.ConfigWindow) this.get_toplevel());
-			    	break;
-				case "exit":
+                    break;
+                case "exit":
                     // This just call exit_terminal signal, how to exit terminal looks signal exit_terminal's hooks that define at current class.
                     exit_terminal();
-					break;
+                    break;
                 case "preference":
                     var preference = new Widgets.Preference((Widgets.ConfigWindow) this.get_toplevel(), ((Gtk.Window) this.get_toplevel()).get_focus());
                     preference.transient_for_window((Widgets.ConfigWindow) this.get_toplevel());
                     break;
             }
-		}        
+        }        
         
-		public void handle_menu_destroy() {
-			menu = null;
+        public void handle_menu_destroy() {
+            menu = null;
             
             if (focus_widget != null) {
                 focus_widget.grab_focus();
